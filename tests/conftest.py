@@ -18,6 +18,15 @@ _SILVER_DDL = os.path.join(_REPO_ROOT, "labs", "week5", "create_silver.ipynb")
 _GOLD_DDL = os.path.join(_REPO_ROOT, "labs", "week6", "create_gold.ipynb")
 
 
+def _is_only_comments(sql):
+    """Return True if the SQL contains no executable statements (only comments/whitespace)."""
+    for line in sql.splitlines():
+        stripped = line.strip()
+        if stripped and not stripped.startswith("--"):
+            return False
+    return True
+
+
 @pytest.fixture(scope="session")
 def spark_session(tmp_path_factory):
     """Session-scoped SparkSession with Delta Lake configured."""
@@ -50,6 +59,7 @@ def spark(spark_session):
 
     Extracts DDL from the create_*.ipynb notebooks and runs it. For gold
     tables, strips GENERATED ALWAYS AS IDENTITY so they work in local Spark.
+    Cells that contain only comments (TODO placeholders) are skipped.
     Tables are torn down after each test.
     """
     # Create schemas
@@ -65,13 +75,10 @@ def spark(spark_session):
     ]:
         for sql in get_all_sql_cells(ddl_path):
             sql = sql.strip()
-            # Skip statements that don't work in local Spark
-            if not sql or sql.startswith("CREATE SCHEMA") or "USE CATALOG" in sql:
+            if not sql or sql.startswith("CREATE SCHEMA") or "USE CATALOG" in sql or _is_only_comments(sql):
                 continue
             if needs_strip:
                 sql = strip_identity(sql)
-            # Databricks defaults to Delta, local Spark doesn't — inject USING DELTA
-            # Syntax: CREATE TABLE name (cols...) USING DELTA
             if "CREATE TABLE" in sql and "USING" not in sql:
                 sql = re.sub(r"\)\s*$", ") USING DELTA", sql)
             spark_session.sql(sql)
