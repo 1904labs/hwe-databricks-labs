@@ -3,7 +3,6 @@ name: All Tests (Full Suite)
 on:
   workflow_dispatch:  # Allow manual trigger
   push:
-    branches: [main]
   pull_request:
     branches: [main]
 
