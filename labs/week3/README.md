@@ -59,11 +59,6 @@ By the end of this lab, students can:
 5. Set up GitHub Actions for automated testing
 6. Understand the value of CI/CD in preventing bugs
 
-## CI/CD Setup
-
-**File:** `ci_template.yml`
-GitHub Actions workflow template. Copy to `.github/workflows/ci.yml` to enable automated testing on every pull request.
-
 ## Next Steps
 
 In weeks 4-6, students will:
