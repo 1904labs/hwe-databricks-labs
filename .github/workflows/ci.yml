@@ -1,10 +1,7 @@
 name: All Tests (Full Suite)
 
 on:
-  workflow_dispatch:  # Allow manual trigger
-  push:
-  pull_request:
-    branches: [main]
+  workflow_dispatch:  # Manual trigger only
 
 jobs:
   test-all:
