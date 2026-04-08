@@ -1,6 +1,7 @@
 name: Week 5 Tests (Silver Layer)
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - 'labs/week5/**'
@@ -8,7 +9,6 @@ on:
       - 'tests/notebook_utils.py'
       - '.github/workflows/week5-tests.yml'
   push:
-    branches: [main]
     paths:
       - 'labs/week5/**'
       - 'tests/test_week5_silver.py'
