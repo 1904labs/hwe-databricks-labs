@@ -37,6 +37,9 @@ def test_valid_email_filter(spark):
     emails = [r.email for r in rows]
     # rows is a list of Row objects; emails is a list of strings
     # TODO: assert the correct number of employees are returned, every email is not None, and contains '@'
+    assert len(rows) == 3
+    for email in emails:
+        assert('@' in email), f"Email address did not contain @!"
 
 
 def test_count_employees(spark):
@@ -44,7 +47,7 @@ def test_count_employees(spark):
     row = _run_cell(spark, "count_employees").collect()[0]
     # row is a Row object; row.total_employees is an integer
     # TODO: assert row.total_employees equals the expected total number of employees
-
+    assert row.total_employees == 6
 
 def test_employees_in_salary_range(spark):
     """Verify that salary range filter returns correct employees."""
@@ -53,6 +56,13 @@ def test_employees_in_salary_range(spark):
     # rows is a list of Row objects; salaries is a list of Decimal values
     # TODO: assert the correct number of employees are returned, all salaries are between 50000 and 100000,
     # and results are in ascending salary order
+    assert len(rows) == 4
+    prev_salary = 0
+    for salary in salaries:
+        assert(salary >= 50000, "Salary was less than 50000!")
+        assert(salary <= 100000, "Salary was more than 100000")
+        assert (salary > prev_salary, "Salaries not in ascending order!")
+        prev_salary = salary    
 
 
 def test_recent_hires(spark):
@@ -60,7 +70,8 @@ def test_recent_hires(spark):
     rows = _run_cell(spark, "recent_hires").collect()
     # rows is a list of Row objects; rows[0].employee_id is a string
     # TODO: assert the correct number of recent hires are returned and check which employee_id appears
-
+    assert len(rows) == 1
+    assert rows[0].employee_id == 'EMP-006'
 
 def test_average_salary_by_department(spark):
     """Verify that average salary by department is calculated correctly."""
@@ -69,7 +80,9 @@ def test_average_salary_by_department(spark):
     # dept_avgs is a dict mapping string (department name) to Decimal (average salary)
     # TODO: assert the correct number of departments are returned, check specific avg_salary values
     # (hint: Engineering avg = 102500, Sales avg = 70000), and verify results are ordered descending by avg_salary
-
+    assert(len(dept_avgs) == 4)
+    assert(dept_avgs["Engineering"] == 102500)
+    assert(dept_avgs["Sales"] == 70000)
 
 # ---------------------------------------------------------------------------
 # Additional validation tests
