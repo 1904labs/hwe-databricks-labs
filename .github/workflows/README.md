@@ -6,11 +6,11 @@ This directory contains 5 CI/CD workflow files for automated testing:
 
 | File | Purpose | Trigger |
 |------|---------|---------|
-| `ci.yml` | Run all tests | Push/PR to main, manual |
-| `week3-tests.yml` | Week 3 SQL tests | Changes to `labs/week3/**` |
-| `week4-tests.yml` | Week 4 Bronze tests | Changes to `labs/week4/**` |
-| `week5-tests.yml` | Week 5 Silver tests | Changes to `labs/week5/**` |
-| `week6-tests.yml` | Week 6 Gold tests | Changes to `labs/week6/**` |
+| `ci.yml` | Run all tests (full suite) | Manual only |
+| `week3-tests.yml` | Week 3 SQL tests | Changes to `labs/week3/**` or `tests/test_week3_sql.py`, manual |
+| `week4-tests.yml` | Week 4 Bronze tests | Changes to `labs/week4/**` or `tests/test_week4_bronze.py`, manual |
+| `week5-tests.yml` | Week 5 Silver tests | Changes to `labs/week5/**` or `tests/test_week5_silver.py`, manual |
+| `week6-tests.yml` | Week 6 Gold tests | Changes to `labs/week6/**` or `tests/test_week6_gold.py`, manual |
 
 ## Quick Start
 

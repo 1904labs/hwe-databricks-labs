@@ -1,20 +1,20 @@
-name: Week 6 Tests (Gold Layer)
+name: Week 3 Demo Tests
 
 on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'labs/week6/**'
-      - 'tests/test_week6_gold.py'
+      - 'labs/week3/week3_demo.ipynb'
+      - 'tests/test_week3_demo.py'
       - 'tests/notebook_utils.py'
-      - '.github/workflows/week6-tests.yml'
+      - '.github/workflows/week3-demo-tests.yml'
   push:
     paths:
-      - 'labs/week6/**'
-      - 'tests/test_week6_gold.py'
+      - 'labs/week3/week3_demo.ipynb'
+      - 'tests/test_week3_demo.py'
 
 jobs:
-  test-week6:
+  test-week3-demo:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,16 +30,11 @@ jobs:
         run: |
           pip install -r requirements-test.txt
 
-      - name: Set up Spark
+      - name: Run Week 3 demo tests
         run: |
-          echo "SPARK_LOCAL_IP=127.0.0.1" >> $GITHUB_ENV
-
-
-      - name: Run Week 6 tests
-        run: |
-          pytest tests/test_week6_gold.py -v --tb=short
+          pytest tests/test_week3_demo.py -v --tb=short
 
       - name: Test Summary
         if: always()
         run: |
-          echo "✅ Week 6 Gold layer tests completed"
+          echo "✅ Week 3 demo tests completed"

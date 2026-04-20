@@ -1,11 +1,7 @@
 name: All Tests (Full Suite)
 
 on:
-  workflow_dispatch:  # Allow manual trigger
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:  # Manual trigger only
 
 jobs:
   test-all:
@@ -28,9 +24,6 @@ jobs:
         run: |
           echo "SPARK_LOCAL_IP=127.0.0.1" >> $GITHUB_ENV
 
-      - name: Create all test schemas and tables
-        run: |
-          python scripts/setup_test_tables.py
 
       - name: Run all tests
         run: |

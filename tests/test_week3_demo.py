@@ -1,9 +1,6 @@
-"""Tests for Week 3 — SQL query and INSERT statement testing.
+"""Demo test file for Week 3 — illustrates the INSERT + verify pattern.
 
-Exercises 1-2: run a SELECT COUNT query and assert the returned count.
-Exercises 3-4: run an INSERT, then query filtered_employees to verify results.
-
-Uses Employee/HR domain data (different from bookstore in weeks 4-6).
+Both patterns: run an INSERT statement, then SELECT to verify the result, then assert.
 """
 
 import os
@@ -11,7 +8,7 @@ import pytest
 from tests.notebook_utils import find_cell
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_W3_LAB = os.path.join(_REPO_ROOT, "labs", "week3", "week3_lab.ipynb")
+_W3_DEMO = os.path.join(_REPO_ROOT, "labs", "week3", "week3_demo.ipynb")
 
 
 # ===========================================================================
@@ -19,29 +16,15 @@ _W3_LAB = os.path.join(_REPO_ROOT, "labs", "week3", "week3_lab.ipynb")
 # ===========================================================================
 
 def test_valid_email_filter(spark):
-    """Verify that the count of employees with valid emails is correct."""
-    _run_cell(spark, "valid_email_filter")
-    rows = spark.sql("SELECT * FROM week3_testing.employees WHERE email LIKE '%@%'").collect()
-    # TODO: assert len(rows) equals the number of employees with a valid email
-
-
-def test_employees_in_salary_range(spark):
-    """Verify that the count of employees in the salary range is correct."""
-    _run_cell(spark, "employees_in_salary_range")
-    rows = spark.sql("SELECT * FROM week3_testing.employees WHERE salary >= 50000 AND salary <= 100000").collect()
-    # TODO: assert len(rows) equals the number of employees with salary between $50,000 and $100,000
-
-
-def test_recent_hires(spark):
-    """Verify that only recent hires are inserted."""
-    _run_cell(spark, "recent_hires")
+    """Assert that only employees with a valid email are inserted into filtered_employees."""
+    _run_cell(spark, "demo_valid_email_filter")
     rows = spark.sql("SELECT * FROM week3_testing.filtered_employees").collect()
-    # TODO: assert len(rows) equals 1 and rows[0].employee_id equals 'EMP-006'
+    # TODO: assert len(rows) equals the number of employees whose email contains '@'
 
 
-def test_engineering_department_filter(spark):
-    """Verify that only Engineering employees are inserted."""
-    _run_cell(spark, "engineering_department_filter")
+def test_insert_engineering_filter(spark):
+    """Assert that only Engineering employees are inserted into filtered_employees."""
+    _run_cell(spark, "demo_insert_engineering_filter")
     rows = spark.sql("SELECT * FROM week3_testing.filtered_employees").collect()
     # TODO: assert len(rows) equals the number of Engineering employees
 
@@ -51,18 +34,14 @@ def test_engineering_department_filter(spark):
 # ===========================================================================
 
 def _run_cell(spark, pattern):
-    sql = find_cell(_W3_LAB, pattern)
+    sql = find_cell(_W3_DEMO, pattern)
     assert sql is not None, f"Could not find cell matching: {pattern}"
     return spark.sql(sql)
 
 
 @pytest.fixture(autouse=True)
 def week3_test_data(spark):
-    """Automatically create week3_testing schema and tables for all tests.
-
-    This fixture runs before every test in this module, creating the
-    schema, tables, and test data that SQL queries will read from.
-    """
+    """Create the week3_testing schema and tables for demo tests."""
     spark.sql("CREATE SCHEMA IF NOT EXISTS week3_testing")
 
     spark.sql("""
@@ -96,3 +75,8 @@ def week3_test_data(spark):
             hire_date DATE
         ) USING DELTA
     """)
+
+    yield
+
+    spark.sql("DROP TABLE IF EXISTS week3_testing.employees")
+    spark.sql("DROP TABLE IF EXISTS week3_testing.filtered_employees")

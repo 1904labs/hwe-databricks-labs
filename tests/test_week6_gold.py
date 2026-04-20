@@ -14,34 +14,22 @@ _W6_LAB = os.path.join(_REPO_ROOT, "labs", "week6", "week6_lab.ipynb")
 
 
 # ===========================================================================
-# Helpers
-# ===========================================================================
-
-def _run_cell(spark, pattern):
-    sql = find_cell(_W6_LAB, pattern)
-    assert sql is not None, f"Could not find cell matching: {pattern}"
-    spark.sql(sql)
-
-
-# ===========================================================================
 # Tests — gold.dim_customer (DO MODIFY - implement these!)
 # ===========================================================================
 
 def test_dim_customer_from_silver(spark):
     _run_cell(spark, "gold_dim_customer_merge")
-    emails = {r.email for r in spark.sql("SELECT email FROM gold.dim_customer").collect()}
-    # emails is a Python set of strings
-    # TODO: assert that 'alice@example.com' and 'bob@example.com' are in `emails`
+    alice = spark.sql("SELECT * FROM gold.dim_customer WHERE email = 'alice@example.com'").collect()
+    bob = spark.sql("SELECT * FROM gold.dim_customer WHERE email = 'bob@example.com'").collect()
+    # TODO: assert len(alice) equals 1 and len(bob) equals 1
 
 
 def test_dim_customer_sentinel(spark):
     _run_cell(spark, "gold_dim_customer_merge")
     _run_cell(spark, "gold_dim_customer_sentinel")
-    name = spark.sql(
-        "SELECT name FROM gold.dim_customer WHERE email = 'in-store'"
-    ).collect()[0].name
-    # name is a string
-    # TODO: assert that name equals 'In-Store Customer'
+    row = spark.sql("SELECT * FROM gold.dim_customer WHERE email = 'in-store'").collect()
+    # row is a list of Row objects; row[0].name is a string
+    # TODO: assert that row[0].name equals 'In-Store Customer'
 
 
 # ---------------------------------------------------------------------------
@@ -50,19 +38,16 @@ def test_dim_customer_sentinel(spark):
 
 def test_dim_store_from_silver(spark):
     _run_cell(spark, "gold_dim_store_merge")
-    store_nbrs = {r.store_nbr for r in spark.sql("SELECT store_nbr FROM gold.dim_store").collect()}
-    # store_nbrs is a Python set of strings
-    # TODO: assert that 'S001' is in `store_nbrs`
+    store = spark.sql("SELECT * FROM gold.dim_store WHERE store_nbr = 'S001'").collect()
+    # TODO: assert len(store) equals 1
 
 
 def test_dim_store_sentinel(spark):
     _run_cell(spark, "gold_dim_store_merge")
     _run_cell(spark, "gold_dim_store_sentinel")
-    name = spark.sql(
-        "SELECT name FROM gold.dim_store WHERE store_nbr = 'online'"
-    ).collect()[0].name
-    # name is a string
-    # TODO: assert that name equals 'Online'
+    row = spark.sql("SELECT * FROM gold.dim_store WHERE store_nbr = 'online'").collect()
+    # row is a list of Row objects; row[0].name is a string
+    # TODO: assert that row[0].name equals 'Online'
 
 
 # ---------------------------------------------------------------------------
@@ -71,7 +56,7 @@ def test_dim_store_sentinel(spark):
 
 def test_dim_book_flattens_hierarchy(spark):
     _run_cell(spark, "gold_dim_book_merge")
-    book = spark.sql("SELECT subgenre, genre, category FROM gold.dim_book").collect()[0]
+    book = spark.sql("SELECT * FROM gold.dim_book").collect()[0]
     # book is a Row object; .subgenre, .genre, .category are strings
     # TODO: assert that book.subgenre, book.genre, and book.category are correctly flattened:
     # subgenre = 'Space Opera', genre = 'Science Fiction', category = 'Fiction'
@@ -83,12 +68,11 @@ def test_dim_book_flattens_hierarchy(spark):
 
 def test_fact_sales_all_items_present(spark):
     _run_cell(spark, "gold_fact_sales_merge")
-    order_ids = {r.order_id for r in spark.sql("SELECT order_id FROM gold.fact_sales").collect()}
-    ins_002_count = spark.sql(
-        "SELECT COUNT(*) AS cnt FROM gold.fact_sales WHERE order_id = 'INS-002'"
-    ).collect()[0].cnt
-    # order_ids is a Python set of strings; ins_002_count is an integer
-    # TODO: assert ONL-001, ONL-002, INS-001 are in order_ids, and ins_002_count equals 2
+    onl_001 = spark.sql("SELECT * FROM gold.fact_sales WHERE order_id = 'ONL-001'").collect()
+    onl_002 = spark.sql("SELECT * FROM gold.fact_sales WHERE order_id = 'ONL-002'").collect()
+    ins_001 = spark.sql("SELECT * FROM gold.fact_sales WHERE order_id = 'INS-001'").collect()
+    ins_002 = spark.sql("SELECT * FROM gold.fact_sales WHERE order_id = 'INS-002'").collect()
+    # TODO: assert len(onl_001), len(onl_002), len(ins_001) each equal 1, and len(ins_002) equals 2
     # (INS-002 had 2 line items, so it should produce 2 fact rows)
 
 
@@ -104,36 +88,30 @@ def test_fact_sales_line_total(spark):
 
 def test_fact_sales_fk_lookups(spark):
     _run_cell(spark, "gold_fact_sales_merge")
-    nulls = spark.sql("""
-        SELECT
-            SUM(CASE WHEN customer_id IS NULL THEN 1 ELSE 0 END) AS null_cust,
-            SUM(CASE WHEN book_id IS NULL THEN 1 ELSE 0 END) AS null_book,
-            SUM(CASE WHEN date_id IS NULL THEN 1 ELSE 0 END) AS null_date,
-            SUM(CASE WHEN store_id IS NULL THEN 1 ELSE 0 END) AS null_store
-        FROM gold.fact_sales
-    """).collect()[0]
-    # nulls is a Row object; .null_cust, .null_book, .null_date, .null_store are integers
-    # TODO: assert that nulls.null_cust, nulls.null_book, nulls.null_date, and nulls.null_store are all 0
+    null_cust = spark.sql("SELECT * FROM gold.fact_sales WHERE customer_id IS NULL").collect()
+    null_book = spark.sql("SELECT * FROM gold.fact_sales WHERE book_id IS NULL").collect()
+    null_date = spark.sql("SELECT * FROM gold.fact_sales WHERE date_id IS NULL").collect()
+    null_store = spark.sql("SELECT * FROM gold.fact_sales WHERE store_id IS NULL").collect()
+    # TODO: assert len of each equals 0 (no fact rows should have NULL foreign keys)
 
 
 def test_fact_sales_degenerate_dims(spark):
     _run_cell(spark, "gold_fact_sales_merge")
-    rows = spark.sql("""
-        SELECT order_id, order_channel, isbn, payment_method
-        FROM gold.fact_sales
-        ORDER BY order_id, isbn
-    """).collect()
-    order_ids = {r.order_id for r in rows}
-    channels = {r.order_channel for r in rows}
-    # order_ids and channels are Python sets of strings; rows is a list of Row objects
-    # TODO: assert expected order IDs are present, channels contains {'online', 'in-store'},
-    # and every row has a non-null payment_method
+    online = spark.sql("SELECT * FROM gold.fact_sales WHERE order_channel = 'online'").collect()
+    instore = spark.sql("SELECT * FROM gold.fact_sales WHERE order_channel = 'in-store'").collect()
+    null_payment = spark.sql("SELECT * FROM gold.fact_sales WHERE payment_method IS NULL").collect()
+    # TODO: assert len(online) > 0, len(instore) > 0, and len(null_payment) equals 0
 
 
 # ===========================================================================
-# Test fixtures — populate silver and gold tables with test data
-# (COMPLETE - Do not modify)
+# DO NOT MODIFY ANYTHING BELOW THIS LINE
 # ===========================================================================
+
+def _run_cell(spark, pattern):
+    sql = find_cell(_W6_LAB, pattern)
+    assert sql is not None, f"Could not find cell matching: {pattern}"
+    spark.sql(sql)
+
 
 @pytest.fixture(autouse=True)
 def silver_data(spark):

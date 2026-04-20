@@ -1,16 +1,16 @@
 name: Week 3 Tests (SQL & Testing)
 
 on:
+  workflow_dispatch:
   pull_request:
     paths:
-      - 'labs/week3/**'
+      - 'labs/week3/week3_lab.ipynb'
       - 'tests/test_week3_sql.py'
       - 'tests/notebook_utils.py'
       - '.github/workflows/week3-tests.yml'
   push:
-    branches: [main]
     paths:
-      - 'labs/week3/**'
+      - 'labs/week3/week3_lab.ipynb'
       - 'tests/test_week3_sql.py'
 
 jobs:
