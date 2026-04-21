@@ -45,7 +45,7 @@ def test_engineering_department_filter(spark):
     _run_cell(spark, "engineering_department_filter")
     rows = spark.sql("SELECT * FROM week3_testing.filtered_employees").collect()
     # TODO: assert len(rows) equals the number of Engineering employees
-    assert len(rows) == 2
+    assert len(rows)==2
 
 # ===========================================================================
 # DO NOT MODIFY ANYTHING BELOW THIS LINE
