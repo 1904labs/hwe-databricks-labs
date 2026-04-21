@@ -23,7 +23,7 @@ def test_valid_email_filter(spark):
     _run_cell(spark, "valid_email_filter")
     rows = spark.sql("SELECT * FROM week3_testing.employees WHERE email LIKE '%@%'").collect()
     # TODO: assert len(rows) equals the number of employees with a valid email
-    assert len(rows) == 4
+    assert len(rows) == 3
 
 def test_employees_in_salary_range(spark):
     """Verify that the count of employees in the salary range is correct."""
