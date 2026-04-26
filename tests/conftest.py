@@ -75,7 +75,7 @@ def spark(spark_session):
     ]:
         for sql in get_all_sql_cells(ddl_path):
             sql = sql.strip()
-            sql_upper = sql.upper()
+            sql_upper = " ".join(sql.upper().split())
             if not sql or sql_upper.startswith("CREATE SCHEMA") or "USE CATALOG" in sql_upper or _is_only_comments(sql):
                 continue
             if needs_strip:
