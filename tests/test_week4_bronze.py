@@ -83,6 +83,9 @@ def test_categories_hierarchy_preserved(spark):
     fiction = spark.sql("SELECT * FROM bronze.categories WHERE category_id = '1'").collect()[0]
     sci_fi = spark.sql("SELECT * FROM bronze.categories WHERE category_id = '3'").collect()[0]
     space_opera = spark.sql("SELECT * FROM bronze.categories WHERE category_id = '11'").collect()[0]
+    assert(fiction.parent_category_id == "")
+    assert(sci_fi.parent_category_id == fiction.category_id)
+    assert(space_opera.parent_category_id == sci_fi.category_id)
     # fiction, sci_fi, space_opera are Row objects; .parent_category_id is a string
     # TODO: assert the correct parent_category_id for each:
     # fiction (top-level) should have empty string, sci_fi should reference fiction, space_opera should reference sci_fi
