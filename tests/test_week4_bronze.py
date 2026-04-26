@@ -29,7 +29,7 @@ def test_categories_insert_overwrite(spark):
     space_opera = spark.sql("SELECT * FROM bronze.categories WHERE category_id = '11'").collect()
     assert(len(fiction) == 1)
     assert(len(sci_fi) == 1)
-    assert(len(space_opera ==1))
+    assert(len(space_opera) ==1)
 
 
 def test_books_insert_overwrite(spark):
@@ -50,7 +50,7 @@ def test_online_orders_merge(spark):
     _run_cell(spark, "bronze_online_orders_merge")
     row = spark.sql("SELECT * FROM bronze.online_orders WHERE order_id = 'ONL-001'").collect()
     assert(len(row) == 1)
-    assert(row[0].customer_email == "alice_updated_email@example.com")
+    assert(row[0].customer_email == "alice@example.com")
     
     # row is a list of Row objects; row[0].customer_email is a string
     # TODO: assert that exactly one row exists for ONL-001 and it has the correct customer_email
@@ -108,6 +108,7 @@ def test_instore_orders_has_cashier_name(spark):
 def test_books_preserves_category_reference(spark):
     _run_cell(spark, "bronze_books_load")
     wrong_category = spark.sql("SELECT * FROM bronze.books WHERE category_id != '11'").collect()
+    assert(len(wrong_category) == 0)
     # TODO: assert len(wrong_category) equals 0 (all books should reference category_id '11')
 
 
@@ -136,6 +137,8 @@ def test_merge_updates_existing_rows(spark):
 
     _run_cell(spark, "bronze_online_orders_merge")
     rows = spark.sql("SELECT * FROM bronze.online_orders").collect()
+    assert(len(rows) == 1)
+    assert(rows[0].customer_email == "alice_updated_email@example.com")
     # TODO: assert that len(rows) equals 1 (MERGE updated, not inserted) and rows[0].customer_email equals 'alice_updated_email@example.com'
 
 
