@@ -48,9 +48,9 @@ def test_books_insert_overwrite(spark):
 
 def test_online_orders_merge(spark):
     _run_cell(spark, "bronze_online_orders_merge")
-    row = spark.sql("SELECT * FROM bronze.online_orders WHERE order_id = 'ONL-000001'").collect()
+    row = spark.sql("SELECT * FROM bronze.online_orders WHERE order_id = 'ONL-001'").collect()
     assert(len(row) == 1)
-    assert(row[0].customer_email == "donna.lopez33@yahoo.com")
+    assert(row[0].customer_email == "alice_updated_email@example.com")
     
     # row is a list of Row objects; row[0].customer_email is a string
     # TODO: assert that exactly one row exists for ONL-001 and it has the correct customer_email
@@ -58,10 +58,10 @@ def test_online_orders_merge(spark):
 
 def test_instore_orders_merge(spark):
     _run_cell(spark, "bronze_instore_orders_merge")
-    row = spark.sql("SELECT * FROM bronze.instore_orders WHERE order_id = 'INS-000001'").collect()
+    row = spark.sql("SELECT * FROM bronze.instore_orders WHERE order_id = 'INS-001'").collect()
     # row is a list of Row objects; row[0].cashier_name is a string
     assert(len(row) ==1)
-    assert row[0].cashier_name == "Skyler Grant"
+    assert row[0].cashier_name == "Bob Jones"
     # TODO: assert that exactly one row exists for INS-001 and it has the correct cashier_name
 
 
@@ -70,6 +70,7 @@ def test_merge_is_idempotent(spark):
     rows_after_first = spark.sql("SELECT * FROM bronze.online_orders").collect()
     _run_cell(spark, "bronze_online_orders_merge")
     rows_after_second = spark.sql("SELECT * FROM bronze.online_orders").collect()
+    assert(len(rows_after_first) == len(rows_after_second))
     # TODO: assert that len(rows_after_first) equals len(rows_after_second) (running MERGE twice should not add rows)
 
 
