@@ -49,21 +49,6 @@ def test_books_filters_invalid_isbn(spark):
     # TODO: assert len(book1) equals 1, len(book2) equals 1, and len(bad) equals 0
 
 
-def test_books_trims_whitespace(spark):
-    spark.sql("""
-        INSERT INTO bronze.books VALUES
-        ('978-0-00-000099-9', '  Padded Title  ', '  Padded Author  ', ' 11 ',
-         current_timestamp(), 'books.csv')
-    """)
-    _run_silver_books(spark)
-    row = spark.sql(
-        "SELECT * FROM silver.books WHERE isbn = '978-0-00-000099-9'"
-    ).collect()
-    # row is a list of Row objects; .title, .author, .category_id are strings
-    # TODO: assert that row has exactly 1 result and row[0].title, row[0].author, row[0].category_id
-    # are trimmed of whitespace
-
-
 # ---------------------------------------------------------------------------
 # Tests — silver.customers
 # ---------------------------------------------------------------------------
@@ -145,6 +130,7 @@ def _run_silver_books(spark):
 
 
 def _run_silver_customers(spark):
+    _run_cell(spark, "silver_customers_most_recent_view")
     _run_cell(spark, "silver_customers_merge")
 
 
